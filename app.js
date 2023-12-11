@@ -43,7 +43,9 @@ const tweetAccesVerification = async (request, response, next) => {
 }
 
 const getFollowingPeopleIdsOfUser = async username => {
-  const getUserIdsQuery = `SELECT following_user_id FROM user INNER JOIN follower ON user.user_id =follower.follower_user_id WHERE user.username='${username}';`
+  const getUserIdsQuery = `SELECT following_user_id 
+  FROM user INNER JOIN follower ON user.user_id =follower.follower_user_id 
+  WHERE user.username='${username}';`
   const followingUser = await db.all(getUserIdsQuery)
   const arrayOfIds = followingUser.map(eachUser => {
     eachUser.following_user_id
@@ -75,9 +77,9 @@ const authenticateToken = (request, response, next) => {
   }
 }
 //API1
-app.post('/register', async (request, response) => {
+app.post('/register/', async (request, response) => {
   const {username, password, name, gender} = request.body
-  const selectUserQuery = `'SELECT * FROM user WHERE username='${username}';`
+  const selectUserQuery = `SELECT * FROM user WHERE username='${username}';`
   const dbUser = await db.get(selectUserQuery)
   if (dbUser === undefined) {
     if (password.length < 6) {
@@ -119,10 +121,15 @@ app.post('/login/', async (request, response) => {
 
 //API3
 app.get('/user/tweets/feed/', authenticateToken, async (request, response) => {
-  const {username} = request
-  const followingPeopleUserIds = await getFollowingPeopleIdsOfUser(username)
+  const {payload} = request
+  const {user_id, name, username, gender} = payload
+  console.log(username)
   const getLatestTweetsQuery = `
-    SELECT username,tweet,date_time AS dateTime FROM user INNER JOIN tweet ON user.user_id = tweet.user_id WHERE user.user_id=${followingPeopleUserIds} ORDER BY date_time DESC LIMIT 4;`
+    SELECT username,tweet,date_time AS dateTime 
+    FROM follower INNER JOIN tweet ON follower.following_user_id = tweet.user_id INNER JOIN user user.user_id=follower.following_user_id
+    WHERE follower.follower.user_id=${user_id}
+    ORDER BY date_time DESC 
+    LIMIT 4;`
   const tweets = await db.all(getLatestTweetsQuery)
   response.send(tweets)
 })
