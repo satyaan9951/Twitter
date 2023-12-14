@@ -238,7 +238,7 @@ app.get(
       ON user.user_id =reply.user_id
     WHERE 
       tweet.tweet_id =${tweetId} AND follower.follower_user_id=${user_id};`
-    const repliedUsers = await db.all(getLikedUsersQuery)
+    const repliedUsers = await db.all(getRepliedUsersQuery)
     if (repliedUsers.length !== 0) {
       let replies = []
       const getNamesArray = repliedUsers => {
@@ -301,7 +301,7 @@ app.delete(
     const {payload} = request
     const {user_id, name, username, gender} = payload
     const {tweetId} = request
-    const getTweetQuery = `SELECT * FROM tweet WHERE tweet.user_id='${user_id} AND tweet.tweet_id='${tweetId}';`
+    const getTweetQuery = `SELECT * FROM tweet WHERE tweet.user_id=${user_id} AND tweet.tweet_id='${tweetId}';`
     const tweetUser = await db.all(getTweetQuery)
     if (tweetUser.length !== 0) {
       const deleteTweetQuery = `DELETE FROM tweet WHERE tweet.user_id=${user_id} AND tweet.tweet_id='${tweetId}';`
